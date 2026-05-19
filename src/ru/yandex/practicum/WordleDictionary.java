@@ -1,13 +1,11 @@
 package ru.yandex.practicum;
 
+import ru.yandex.practicum.exceptions.EmptyDictionaryException;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-/*
-этот класс содержит в себе список слов List<String>
-    его методы похожи на методы списка, но учитывают особенности игры
-    также этот класс может содержать рутинные функции по сравнению слов, букв и т.д.
- */
 public class WordleDictionary {
 
     private final List<String> words;
@@ -15,8 +13,10 @@ public class WordleDictionary {
     public WordleDictionary(List<String> words) {
         List<String> newWords = new ArrayList<>();
         for (String word : words) {
-        String newWord = normalizeWord(word);
-        newWords.add(newWord);
+            String newWord = normalizeWord(word);
+            if (!newWord.isEmpty()) {
+                newWords.add(newWord);
+            }
         }
         this.words = newWords;
     }
@@ -31,7 +31,7 @@ public class WordleDictionary {
     }
 
     public List<String> getWords() {
-        return words;
+        return List.copyOf(words);
     }
 
     public int size() {
@@ -41,4 +41,14 @@ public class WordleDictionary {
     public boolean isEmpty() {
         return words.isEmpty();
     }
+
+    public String getRandomWord() {
+        if (isEmpty()) {
+            throw new EmptyDictionaryException("Словарь пуст!");
+        }
+        Random random = new Random();
+        int randomIndex = random.nextInt(words.size());
+        return words.get(randomIndex);
+    }
 }
+
