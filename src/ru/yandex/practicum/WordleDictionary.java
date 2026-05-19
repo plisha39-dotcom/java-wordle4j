@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class WordleDictionary {
 
-    private List<String> words;
+    private final List<String> words;
 
     public WordleDictionary(List<String> words) {
         List<String> newWords = new ArrayList<>();
@@ -32,5 +32,13 @@ public class WordleDictionary {
 
     public List<String> getWords() {
         return words;
+    }
+
+    public int size() {
+        return words.size();
+    }
+
+    public boolean isEmpty() {
+        return words.isEmpty();
     }
 }
