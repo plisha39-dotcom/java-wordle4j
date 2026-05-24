@@ -45,7 +45,7 @@ class WordleDictionaryTest {
     }
 
     @Test
-    void testGetWordsReturnsACopy() {
+    void testGetWordsReturnsUnmodifiableList() {
         List<String> words = List.of("кошка", "дом");
 
         WordleDictionary dictionary = new WordleDictionary(words);
@@ -64,13 +64,94 @@ class WordleDictionaryTest {
     }
 
     @Test
-    void testGetRandomWordThrowsAnExceptionOnAnEmptyDictionary() {
+    void testGetRandomWordThrowsExceptionWhenDictionaryIsEmpty() {
         WordleDictionary dictionary = new WordleDictionary(List.of());
         try {
             dictionary.getRandomWord();
             Assertions.fail("getRandomWord() должен выбрасывать исключение для пустого словаря");
         } catch (EmptyDictionaryException e) {
             Assertions.assertEquals("Словарь пуст!", e.getMessage());
+        }
+    }
+
+    @Test
+    void testCompareHandlesRepeatedLettersInGuess() {
+        String secret = "apple";
+        String guess = "allee";
+        List<String> words = List.of(secret, guess);
+        WordleDictionary dictionary = new WordleDictionary(words);
+
+        String expected = "+^--+";
+
+        String actual = dictionary.compare(secret, guess);
+
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    void testCompareReturnsAllPlusesWhenWordsAreEqual() {
+        String secret = "apple";
+        String guess = "apple";
+        List<String> words = List.of(secret, guess);
+        WordleDictionary dictionary = new WordleDictionary(words);
+
+        String expected = "+++++";
+
+        String actual = dictionary.compare(secret, guess);
+
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    void testCompareHandlesRepeatedLettersInSecret() {
+        String secret = "allee";
+        String guess = "llama";
+        List<String> words = List.of(secret, guess);
+        WordleDictionary dictionary = new WordleDictionary(words);
+
+        String expected = "^+^--";
+
+        String actual = dictionary.compare(secret, guess);
+
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    void testCompareThrowsExceptionWhenWordsHaveDifferentLength() {
+        String secret = "apple";
+        String guess = "app";
+        WordleDictionary dictionary = new WordleDictionary(List.of("apple"));
+        try {
+            dictionary.compare(secret, guess);
+            Assertions.fail("Должно выпасть исключение если длина слов разная");
+        } catch (IllegalArgumentException e) {
+            Assertions.assertEquals("Слова разной длины", e.getMessage());
+        }
+    }
+
+    @Test
+    void testCompareThrowsExceptionWhenSecretIsNull() {
+        String secret = null;
+        String guess = "apple";
+        WordleDictionary dictionary = new WordleDictionary(List.of("apple"));
+        try {
+            dictionary.compare(secret, guess);
+            Assertions.fail("Должно выпасть исключение если слово null");
+        } catch (IllegalArgumentException e) {
+            Assertions.assertEquals("Secret и guess не должны быть null", e.getMessage());
+        }
+    }
+
+    @Test
+    void testCompareThrowsExceptionWhenGuessIsNull() {
+        String secret = "apple";
+        String guess = null;
+        WordleDictionary dictionary = new WordleDictionary(List.of("apple"));
+        try {
+            dictionary.compare(secret, guess);
+            Assertions.fail("Должно выпасть исключение если слово null");
+        } catch (IllegalArgumentException e) {
+            Assertions.assertEquals("Secret и guess не должны быть null", e.getMessage());
         }
     }
 }

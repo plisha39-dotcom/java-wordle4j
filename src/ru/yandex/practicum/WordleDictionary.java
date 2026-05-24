@@ -2,9 +2,7 @@ package ru.yandex.practicum;
 
 import ru.yandex.practicum.exceptions.EmptyDictionaryException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class WordleDictionary {
 
@@ -49,6 +47,40 @@ public class WordleDictionary {
         Random random = new Random();
         int randomIndex = random.nextInt(words.size());
         return words.get(randomIndex);
+    }
+
+    public String compare(String secret, String guess) {
+        if (secret == null || guess == null) {
+            throw new IllegalArgumentException ("Secret и guess не должны быть null");
+        }
+        if (secret.length() != guess.length()) {
+            throw new IllegalArgumentException("Слова разной длины");
+        }
+
+        char[] result = new char[secret.length()];
+        Map<Character, Integer> letter = new HashMap<>();
+
+        for (int i = 0; i < result.length; i++) {
+            if (secret.charAt(i) == guess.charAt(i)) {
+                result[i] = '+';
+            } else {
+                char c = secret.charAt(i);
+                letter.put(c, letter.getOrDefault(c, 0) + 1);
+            }
+        }
+        for (int i = 0; i < result.length; i++) {
+            if (result[i] == '+') {
+                continue;
+            }
+            char current = guess.charAt(i);
+            if (letter.containsKey(current) && letter.get(current) > 0) {
+                result[i] = '^';
+                letter.put(current, letter.get(current) - 1);
+            } else {
+                result[i] = '-';
+            }
+        }
+        return new String(result);
     }
 }
 
