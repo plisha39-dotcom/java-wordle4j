@@ -76,12 +76,12 @@ class WordleDictionaryTest {
 
     @Test
     void testCompareHandlesRepeatedLettersInGuess() {
-        String secret = "apple";
-        String guess = "allee";
+        String secret = "лапка";
+        String guess = "папка";
         List<String> words = List.of(secret, guess);
         WordleDictionary dictionary = new WordleDictionary(words);
 
-        String expected = "+^--+";
+        String expected = "-++++";
 
         String actual = dictionary.compare(secret, guess);
 
@@ -90,8 +90,8 @@ class WordleDictionaryTest {
 
     @Test
     void testCompareReturnsAllPlusesWhenWordsAreEqual() {
-        String secret = "apple";
-        String guess = "apple";
+        String secret = "кошка";
+        String guess = "кошка";
         List<String> words = List.of(secret, guess);
         WordleDictionary dictionary = new WordleDictionary(words);
 
@@ -104,12 +104,12 @@ class WordleDictionaryTest {
 
     @Test
     void testCompareHandlesRepeatedLettersInSecret() {
-        String secret = "allee";
-        String guess = "llama";
+        String secret = "касса";
+        String guess = "скала";
         List<String> words = List.of(secret, guess);
         WordleDictionary dictionary = new WordleDictionary(words);
 
-        String expected = "^+^--";
+        String expected = "^^^-+";
 
         String actual = dictionary.compare(secret, guess);
 
@@ -118,9 +118,9 @@ class WordleDictionaryTest {
 
     @Test
     void testCompareThrowsExceptionWhenWordsHaveDifferentLength() {
-        String secret = "apple";
-        String guess = "app";
-        WordleDictionary dictionary = new WordleDictionary(List.of("apple"));
+        String secret = "кошка";
+        String guess = "кош";
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
         try {
             dictionary.compare(secret, guess);
             Assertions.fail("Должно выпасть исключение если длина слов разная");
@@ -132,8 +132,8 @@ class WordleDictionaryTest {
     @Test
     void testCompareThrowsExceptionWhenSecretIsNull() {
         String secret = null;
-        String guess = "apple";
-        WordleDictionary dictionary = new WordleDictionary(List.of("apple"));
+        String guess = "кошка";
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
         try {
             dictionary.compare(secret, guess);
             Assertions.fail("Должно выпасть исключение если слово null");
@@ -144,9 +144,9 @@ class WordleDictionaryTest {
 
     @Test
     void testCompareThrowsExceptionWhenGuessIsNull() {
-        String secret = "apple";
+        String secret = "кошка";
         String guess = null;
-        WordleDictionary dictionary = new WordleDictionary(List.of("apple"));
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
         try {
             dictionary.compare(secret, guess);
             Assertions.fail("Должно выпасть исключение если слово null");
