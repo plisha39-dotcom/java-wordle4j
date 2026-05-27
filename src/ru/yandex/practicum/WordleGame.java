@@ -10,12 +10,12 @@ import java.util.List;
 
 public class WordleGame {
     private final String answer;
-    private int steps;
     private final WordleDictionary dictionary;
-    private boolean finished;
     private final List<String> attempts;
     private final List<String> hints;
     private final List<String> suggestedWords;
+    private int steps;
+    private boolean finished;
 
     public WordleGame(WordleDictionary dictionary) {
         validateDictionary(dictionary);

@@ -3,7 +3,10 @@ package ru.yandex.practicum;
 import ru.yandex.practicum.exceptions.DictionaryLoadException;
 import ru.yandex.practicum.exceptions.EmptyDictionaryException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +24,11 @@ public class WordleDictionaryLoader {
     public WordleDictionary load() {
         List<String> words = new ArrayList<>();
         log.println("Начинаем загрузку словаря: " + filename);
-        try(BufferedReader bufferedReader = new BufferedReader(new FileReader(filename, StandardCharsets.UTF_8))) {
-            while (bufferedReader.ready()) {
-                String line = bufferedReader.readLine();
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filename, StandardCharsets.UTF_8))) {
+            String line = bufferedReader.readLine();
+            while (bufferedReader.readLine() != null) {
                 words.add(line);
+                line = bufferedReader.readLine();
             }
         } catch (IOException e) {
             log.println("Ошибка загрузки словаря: " + e.getMessage());

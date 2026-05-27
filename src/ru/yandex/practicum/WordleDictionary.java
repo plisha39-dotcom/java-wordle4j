@@ -51,7 +51,7 @@ public class WordleDictionary {
 
     public String compare(String secret, String guess) {
         if (secret == null || guess == null) {
-            throw new IllegalArgumentException ("Secret и guess не должны быть null");
+            throw new IllegalArgumentException("Secret и guess не должны быть null");
         }
         if (secret.length() != guess.length()) {
             throw new IllegalArgumentException("Слова разной длины");
