@@ -8,19 +8,6 @@ import ru.yandex.practicum.exceptions.WordNotFoundInDictionaryException;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-в этом классе хранится словарь и состояние игры
-    текущий шаг
-    всё что пользователь вводил
-    правильный ответ
-
-в этом классе нужны методы, которые
-    проанализируют совпадение слова с ответом
-    предложат слово-подсказку с учётом всего, что вводил пользователь ранее
-
-не забудьте про специальные типы исключений для игровых и неигровых ошибок
- */
-
 public class WordleGame {
     private final String answer;
     private int steps;
@@ -28,6 +15,7 @@ public class WordleGame {
     private boolean finished;
     private final List<String> attempts;
     private final List<String> hints;
+    private final List<String> suggestedWords;
 
     public WordleGame(WordleDictionary dictionary) {
         validateDictionary(dictionary);
@@ -37,8 +25,10 @@ public class WordleGame {
         this.finished = false;
         this.attempts = new ArrayList<>();
         this.hints = new ArrayList<>();
+        this.suggestedWords = new ArrayList<>();
     }
 
+    // сделал конструктор, чтобы сделать контролируемый answer для тестов
     public WordleGame(WordleDictionary dictionary, String answer) {
         validateDictionary(dictionary);
         if (answer == null) {
@@ -57,6 +47,7 @@ public class WordleGame {
         this.finished = false;
         this.attempts = new ArrayList<>();
         this.hints = new ArrayList<>();
+        this.suggestedWords = new ArrayList<>();
     }
 
     public String makeGuess(String guess) {
@@ -112,8 +103,14 @@ public class WordleGame {
     }
 
     public String suggestWord() {
+        if (finished) {
+            throw new GameAlreadyFinishedException("Игра закончена!");
+        }
         for (String word : dictionary.getWords()) {
             if (attempts.contains(word)) {
+                continue;
+            }
+            if (suggestedWords.contains(word)) {
                 continue;
             }
             if (word.length() != answer.length()) {
@@ -122,6 +119,7 @@ public class WordleGame {
             if (!matchesHistory(word)) {
                 continue;
             }
+            suggestedWords.add(word);
             return word;
         }
         throw new NoAvailableWordsException("Нет доступных слов для подсказки!");

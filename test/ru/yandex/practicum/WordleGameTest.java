@@ -166,8 +166,7 @@ public class WordleGameTest {
     void testConstructorNormalizesAnswer() {
         String guess = "кошка";
         String answer = " КОШКА ";
-        List<String> words = List.of(answer, guess);
-        WordleDictionary dictionary = new WordleDictionary(words);
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
         WordleGame game = new WordleGame(dictionary, answer);
         String expected = "+++++";
 
@@ -339,7 +338,51 @@ public class WordleGameTest {
     }
 
     @Test
-    void testSuggestWordThrowsExceptionWhenNoAvailableWords() {
+    void testSuggestWordSkipsWordsThatDoNotMatchHistory() {
+        String answer = "кошка";
+        WordleDictionary dictionary = new WordleDictionary(List.of("маска", "лапка", "кошка"));
+        WordleGame game = new WordleGame(dictionary, answer);
+
+        game.makeGuess("маска");
+
+        String actual = game.suggestWord();
+
+        Assertions.assertEquals("кошка", actual);
+    }
+
+    @Test
+    void testSuggestWordDoesNotReturnSameSuggestionTwice() {
+        String answer = "кошка";
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка", "маска"));
+        WordleGame game = new WordleGame(dictionary, answer);
+
+        String firstSuggestion = game.suggestWord();
+        String secondSuggestion = game.suggestWord();
+
+        Assertions.assertEquals("кошка", firstSuggestion);
+        Assertions.assertEquals("маска", secondSuggestion);
+    }
+
+    @Test
+    void testSuggestWordThrowsExceptionWhenAllSuggestionsWereAlreadyUsed() {
+        String answer = "кошка";
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
+        WordleGame game = new WordleGame(dictionary, answer);
+
+        String firstSuggestion = game.suggestWord();
+
+        Assertions.assertEquals("кошка", firstSuggestion);
+
+        try {
+            game.suggestWord();
+            Assertions.fail("Должно выбрасываться исключение если все подсказки использованы");
+        } catch (NoAvailableWordsException e) {
+            Assertions.assertEquals("Нет доступных слов для подсказки!", e.getMessage());
+        }
+    }
+
+    @Test
+    void testSuggestWordThrowsExceptionWhenGameAlreadyFinished() {
         String answer = "кошка";
         WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
         WordleGame game = new WordleGame(dictionary, answer);
@@ -348,9 +391,9 @@ public class WordleGameTest {
 
         try {
             game.suggestWord();
-            Assertions.fail("Должно выбрасываться исключение если нет доступных слов для подсказки");
-        } catch (NoAvailableWordsException e) {
-            Assertions.assertEquals("Нет доступных слов для подсказки!", e.getMessage());
+            Assertions.fail("suggestWord должен выбрасывать исключение если игра окончена");
+        } catch (GameAlreadyFinishedException e) {
+            Assertions.assertEquals("Игра закончена!", e.getMessage());
         }
     }
 }
