@@ -12,15 +12,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-/*
-в главном классе нам нужно:
-    создать лог-файл (он должен передаваться во все классы)
-    создать загрузчик словарей WordleDictionaryLoader
-    загрузить словарь WordleDictionary с помощью класса WordleDictionaryLoader
-    затем создать игру WordleGame и передать ей словарь
-    вызвать игровой метод в котором в цикле опрашивать пользователя и передавать информацию в игру
-    вывести состояние игры и конечный результат
- */
 public class Wordle {
 
     public static void main(String[] args) {
@@ -32,53 +23,36 @@ public class Wordle {
                 WordleGame game = new WordleGame(dictionary);
                 log.println("Игра успешно создана. Размер словаря: " + dictionary.size());
                 while (!game.isFinished()) {
-                    System.out.println("Выберите действие:");
-                    System.out.println("1 - Ввести слово");
-                    System.out.println("2 - Подсказка");
-                    System.out.println("0 - Выход");
-
-                    String command = scanner.nextLine().trim();
-
-                    switch (command) {
-                        case "1": {
-                            System.out.println("Введите слово: ");
-                            String input = scanner.nextLine();
-                            try {
-                                String mask = game.makeGuess(input);
-
-                                System.out.println("Результат: " + mask);
-                                System.out.println("Ход: " + game.getSteps());
-
-                                if (game.isFinished()) {
-                                    System.out.println("Поздравляем! Вы угадали слово!");
-                                    log.println("Игра завершена, общее количество ходов: " + game.getSteps());
-                                }
-                            } catch (WordNotFoundInDictionaryException | IllegalArgumentException e) {
-                                System.out.println(e.getMessage());
-                                log.println("Ошибка ввода слова: " + e.getMessage());
-                            } catch (GameAlreadyFinishedException e) {
-                                System.out.println(e.getMessage());
-                                log.println("Попытка хода после завершения игры: " + e.getMessage());
-                            }
-                            break;
+                    printPrompt();
+                    String input = scanner.nextLine();
+                    String command = input.trim();
+                    if (command.equals("0")) {
+                        System.out.println("Выход из игры");
+                        System.out.println("Загаданное слово: " + game.getAnswer());
+                        return;
+                    }
+                    if (command.isEmpty()) {
+                        try {
+                            String suggested = game.suggestWord();
+                            System.out.println("Возможный вариант: " + suggested);
+                        } catch (NoAvailableWordsException | GameAlreadyFinishedException e) {
+                            System.out.println(e.getMessage());
+                            log.println("Ошибка получения возможного варианта: " + e.getMessage());
                         }
-                        case "2": {
-                            try {
-                                String suggested = game.suggestWord();
-                                System.out.println("Возможный вариант: " + suggested);
-                            } catch (NoAvailableWordsException | GameAlreadyFinishedException e) {
-                                System.out.println(e.getMessage());
-                                log.println("Ошибка получения подсказки: " + e.getMessage());
-                            }
-                            break;
+                        continue;
+                    }
+                    try {
+                        game.makeGuess(input);
+                        System.out.println(game.getState());
+                        if (game.isFinished()) {
+                            printFinalResult(game);
                         }
-                        case "0":
-                            System.out.println("Выход из игры");
-                            log.println("Пользователь завершил игру.");
-                            return;
-                        default:
-                            System.out.println("Неизвестная команда");
-                            break;
+                    } catch (WordNotFoundInDictionaryException | IllegalArgumentException e) {
+                        System.out.println(e.getMessage());
+                        log.println("Ошибка ввода слова: " + e.getMessage());
+                    } catch (GameAlreadyFinishedException e) {
+                        System.out.println(e.getMessage());
+                        log.println("Попытка хода после завершения игры: " + e.getMessage());
                     }
                 }
             } catch (DictionaryLoadException e) {
@@ -98,4 +72,22 @@ public class Wordle {
             System.out.println("Не удалось создать лог-файл: " + e.getMessage());
         }
     }
+
+    private static void printPrompt() {
+        System.out.println();
+        System.out.println("Введите слово из 5 букв.");
+        System.out.println("Нажмите Enter без ввода, чтобы получить возможный вариант.");
+        System.out.println("Введите 0 для выхода.");
+        System.out.print("> ");
+    }
+
+    private static void printFinalResult(WordleGame game) {
+        if (game.isWon()) {
+            System.out.println("Поздравляем! Вы угадали слово!");
+        } else {
+            System.out.println("Попытки закончились. Вы проиграли.");
+        }
+        System.out.println("Загаданное слово: " + game.getAnswer());
+    }
 }
+

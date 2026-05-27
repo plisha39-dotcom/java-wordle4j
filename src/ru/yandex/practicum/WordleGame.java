@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WordleGame {
+    private static final int MAX_STEPS = 6;
     private final String answer;
     private final WordleDictionary dictionary;
     private final List<String> attempts;
@@ -16,6 +17,7 @@ public class WordleGame {
     private final List<String> suggestedWords;
     private int steps;
     private boolean finished;
+    private boolean won;
 
     public WordleGame(WordleDictionary dictionary) {
         validateDictionary(dictionary);
@@ -26,6 +28,7 @@ public class WordleGame {
         this.attempts = new ArrayList<>();
         this.hints = new ArrayList<>();
         this.suggestedWords = new ArrayList<>();
+        this.won = false;
     }
 
     // сделал конструктор, чтобы сделать контролируемый answer для тестов
@@ -48,6 +51,7 @@ public class WordleGame {
         this.attempts = new ArrayList<>();
         this.hints = new ArrayList<>();
         this.suggestedWords = new ArrayList<>();
+        this.won = false;
     }
 
     public String makeGuess(String guess) {
@@ -72,6 +76,9 @@ public class WordleGame {
         hints.add(hint);
         steps++;
         if (normalizedGuess.equals(answer)) {
+            won = true;
+            finished = true;
+        } else if (steps >= MAX_STEPS) {
             finished = true;
         }
         return hint;
@@ -84,6 +91,10 @@ public class WordleGame {
         if (dictionary.isEmpty()) {
             throw new EmptyDictionaryException("Словарь пуст!");
         }
+    }
+
+    public int getRemainingSteps() {
+        return MAX_STEPS - steps;
     }
 
     public int getSteps() {
@@ -135,5 +146,37 @@ public class WordleGame {
             }
         }
         return true;
+    }
+
+    public boolean isWon() {
+        return won;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public String getState() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("История ходов:")
+                .append(System.lineSeparator());
+
+        for (int i = 0; i < attempts.size(); i++) {
+            builder.append(attempts.get(i))
+                    .append(System.lineSeparator());
+            builder.append(hints.get(i))
+                    .append(System.lineSeparator())
+                    .append(System.lineSeparator());
+        }
+
+        builder.append("Ход: ")
+                .append(steps)
+                .append(System.lineSeparator());
+
+        builder.append("Осталось попыток: ")
+                .append(getRemainingSteps());
+
+        return builder.toString();
     }
 }

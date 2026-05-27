@@ -396,4 +396,122 @@ public class WordleGameTest {
             Assertions.assertEquals("Игра закончена!", e.getMessage());
         }
     }
+
+    @Test
+    void testNewGameStartsWithSixRemainingSteps() {
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
+        WordleGame game = new WordleGame(dictionary);
+
+        Assertions.assertEquals(6, game.getRemainingSteps());
+    }
+
+    @Test
+    void testMakeGuessDecreasesRemainingStepsAfterValidGuess() {
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
+        WordleGame game = new WordleGame(dictionary);
+
+        game.makeGuess("кошка");
+
+        Assertions.assertEquals(5, game.getRemainingSteps());
+    }
+
+    @Test
+    void testMakeGuessDoesNotDecreaseRemainingStepsAfterInvalidGuess() {
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
+        WordleGame game = new WordleGame(dictionary);
+
+        try {
+            game.makeGuess("      ");
+            Assertions.fail("makeGuess должен выбрасывать исключение если guess пустое слово");
+        } catch (IllegalArgumentException e) {
+            Assertions.assertEquals("Слово не может быть пустым", e.getMessage());
+        }
+
+        Assertions.assertEquals(6, game.getRemainingSteps());
+    }
+
+    @Test
+    void testGameEndsAfter6IncorrectValidAttempts() {
+        String answer = "кошка";
+        WordleDictionary dictionary = new WordleDictionary(List.of(
+                "кошка", "маска", "лапка", "банка", "рамка", "шапка", "парта"
+        ));
+        WordleGame game = new WordleGame(dictionary, answer);
+
+        game.makeGuess("маска");
+        game.makeGuess("лапка");
+        game.makeGuess("банка");
+        game.makeGuess("рамка");
+        game.makeGuess("шапка");
+        game.makeGuess("парта");
+
+        Assertions.assertTrue(game.isFinished());
+        Assertions.assertEquals(6, game.getSteps());
+        Assertions.assertEquals(0, game.getRemainingSteps());
+    }
+
+    @Test
+    void testNewGameStartsNotWon() {
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
+        WordleGame game = new WordleGame(dictionary);
+
+        Assertions.assertFalse(game.isWon());
+    }
+
+    @Test
+    void testMakeGuessSetsWonWhenWordIsCorrect() {
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
+        WordleGame game = new WordleGame(dictionary);
+
+        game.makeGuess("кошка");
+
+        Assertions.assertTrue(game.isWon());
+        Assertions.assertTrue(game.isFinished());
+    }
+
+    @Test
+    void testGameIsNotWonAfter6IncorrectValidAttempts() {
+        String answer = "кошка";
+        WordleDictionary dictionary = new WordleDictionary(List.of(
+                "кошка", "маска", "лапка", "банка", "рамка", "шапка", "парта"
+        ));
+        WordleGame game = new WordleGame(dictionary, answer);
+
+        game.makeGuess("маска");
+        game.makeGuess("лапка");
+        game.makeGuess("банка");
+        game.makeGuess("рамка");
+        game.makeGuess("шапка");
+        game.makeGuess("парта");
+
+        Assertions.assertTrue(game.isFinished());
+        Assertions.assertFalse(game.isWon());
+        Assertions.assertEquals(0, game.getRemainingSteps());
+    }
+
+    @Test
+    void testGetAnswerReturnsNormalizedAnswer() {
+        WordleDictionary dictionary = new WordleDictionary(List.of("кошка"));
+        WordleGame game = new WordleGame(dictionary, " КОШКА ");
+
+        Assertions.assertEquals("кошка", game.getAnswer());
+    }
+
+    @Test
+    void testGetStateReturnsAttemptsHintsAndSteps() {
+        String answer = "кошка";
+        String guess = "маска";
+        WordleDictionary dictionary = new WordleDictionary(List.of(answer, guess));
+        WordleGame game = new WordleGame(dictionary, answer);
+
+        game.makeGuess(guess);
+
+        String state = game.getState();
+
+        Assertions.assertTrue(state.contains("История ходов:"));
+        Assertions.assertTrue(state.contains("маска"));
+        Assertions.assertTrue(state.contains("---++"));
+        Assertions.assertTrue(state.contains("Ход: 1"));
+        Assertions.assertTrue(state.contains("Осталось попыток: 5"));
+    }
 }

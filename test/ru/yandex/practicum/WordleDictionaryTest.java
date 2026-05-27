@@ -19,7 +19,7 @@ class WordleDictionaryTest {
         WordleDictionary dictionary = new WordleDictionary(words);
         List<String> actualWords = dictionary.getWords();
 
-        Assertions.assertEquals(List.of("кошка", "дом", "собака"), actualWords);
+        Assertions.assertEquals(List.of("кошка"), actualWords);
     }
 
     @Test
@@ -28,9 +28,9 @@ class WordleDictionaryTest {
 
         WordleDictionary dictionary = new WordleDictionary(words);
 
-        Assertions.assertEquals(2, dictionary.size());
+        Assertions.assertEquals(1, dictionary.size());
         Assertions.assertTrue(dictionary.contains("кошка"));
-        Assertions.assertTrue(dictionary.contains("дом"));
+        Assertions.assertFalse(dictionary.contains("дом"));
     }
 
     @Test
@@ -40,7 +40,7 @@ class WordleDictionaryTest {
         WordleDictionary dictionary = new WordleDictionary(words);
 
         Assertions.assertTrue(dictionary.contains(" КОШКА "));
-        Assertions.assertTrue(dictionary.contains("Дом"));
+        Assertions.assertFalse(dictionary.contains("Дом"));
         Assertions.assertFalse(dictionary.contains("собака"));
     }
 
@@ -59,7 +59,7 @@ class WordleDictionaryTest {
             // ожидаемое поведение
         }
 
-        Assertions.assertEquals(2, dictionary.size());
+        Assertions.assertEquals(1, dictionary.size());
         Assertions.assertFalse(dictionary.contains("собака"));
     }
 
@@ -153,5 +153,22 @@ class WordleDictionaryTest {
         } catch (IllegalArgumentException e) {
             Assertions.assertEquals("Secret и guess не должны быть null", e.getMessage());
         }
+    }
+
+    @Test
+    void testNormalizeWordReplacesYoWithE() {
+        WordleDictionary dictionary = new WordleDictionary(List.of("берег"));
+
+        String actual = dictionary.normalizeWord(" БЕРЁГ ");
+
+        Assertions.assertEquals("берег", actual);
+    }
+
+    @Test
+    void testConstructorReplacesYoWithE() {
+        WordleDictionary dictionary = new WordleDictionary(List.of("берёг"));
+
+        Assertions.assertTrue(dictionary.contains("берег"));
+        Assertions.assertTrue(dictionary.contains("берёг"));
     }
 }

@@ -24,9 +24,9 @@ public class WordleDictionaryLoaderTest {
         try (Writer fileWriter = new FileWriter(testFile.toString(), StandardCharsets.UTF_8)) {
             fileWriter.write("кошка");
             fileWriter.write("\n");
-            fileWriter.write("дом");
+            fileWriter.write("маска");
             fileWriter.write("\n");
-            fileWriter.write("собака");
+            fileWriter.write("лапка");
         }
         PrintWriter log = new PrintWriter(System.out);
 
@@ -35,8 +35,8 @@ public class WordleDictionaryLoaderTest {
 
         Assertions.assertEquals(3, dictionary.size());
         Assertions.assertTrue(dictionary.contains("кошка"));
-        Assertions.assertTrue(dictionary.contains("дом"));
-        Assertions.assertTrue(dictionary.contains("собака"));
+        Assertions.assertTrue(dictionary.contains("маска"));
+        Assertions.assertTrue(dictionary.contains("лапка"));
     }
 
     @Test

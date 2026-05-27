@@ -12,7 +12,7 @@ public class WordleDictionary {
         List<String> newWords = new ArrayList<>();
         for (String word : words) {
             String newWord = normalizeWord(word);
-            if (!newWord.isEmpty()) {
+            if (newWord.length() == 5) {
                 newWords.add(newWord);
             }
         }
@@ -20,7 +20,7 @@ public class WordleDictionary {
     }
 
     public String normalizeWord(String word) {
-        return word.trim().toLowerCase();
+        return word.trim().toLowerCase().replace("ё", "е");
     }
 
     public boolean contains(String word) {
