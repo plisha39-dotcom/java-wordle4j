@@ -1,23 +1,197 @@
 package ru.yandex.practicum;
 
-/*
-в этом классе хранится словарь и состояние игры
-    текущий шаг
-    всё что пользователь вводил
-    правильный ответ
+import ru.yandex.practicum.exceptions.EmptyDictionaryException;
+import ru.yandex.practicum.exceptions.GameAlreadyFinishedException;
+import ru.yandex.practicum.exceptions.NoAvailableWordsException;
+import ru.yandex.practicum.exceptions.WordNotFoundInDictionaryException;
 
-в этом классе нужны методы, которые
-    проанализируют совпадение слова с ответом
-    предложат слово-подсказку с учётом всего, что вводил пользователь ранее
+import java.util.ArrayList;
+import java.util.List;
 
-не забудьте про специальные типы исключений для игровых и неигровых ошибок
- */
 public class WordleGame {
-
-    private String answer;
-
+    private static final int MAX_STEPS = 6;
+    private final String answer;
+    private final WordleDictionary dictionary;
+    private final List<String> attempts;
+    private final List<String> hints;
+    private final List<String> suggestedWords;
     private int steps;
+    private boolean finished;
+    private boolean won;
 
-    private WordleDictionary dictionary;
+    public WordleGame(WordleDictionary dictionary) {
+        validateDictionary(dictionary);
+        this.dictionary = dictionary;
+        this.answer = dictionary.getRandomWord();
+        this.steps = 0;
+        this.finished = false;
+        this.attempts = new ArrayList<>();
+        this.hints = new ArrayList<>();
+        this.suggestedWords = new ArrayList<>();
+        this.won = false;
+    }
 
+    // сделал конструктор, чтобы сделать контролируемый answer для тестов
+    public WordleGame(WordleDictionary dictionary, String answer) {
+        validateDictionary(dictionary);
+        if (answer == null) {
+            throw new IllegalArgumentException("answer не может быть null");
+        }
+        String normalizedAnswer = dictionary.normalizeWord(answer);
+        if (normalizedAnswer.isEmpty()) {
+            throw new IllegalArgumentException("Слово не может быть пустым");
+        }
+        if (!dictionary.contains(normalizedAnswer)) {
+            throw new IllegalArgumentException("answer отсутствует в словаре!");
+        }
+        this.dictionary = dictionary;
+        this.answer = normalizedAnswer;
+        this.steps = 0;
+        this.finished = false;
+        this.attempts = new ArrayList<>();
+        this.hints = new ArrayList<>();
+        this.suggestedWords = new ArrayList<>();
+        this.won = false;
+    }
+
+    public String makeGuess(String guess)
+            throws GameAlreadyFinishedException, WordNotFoundInDictionaryException {
+        if (finished) {
+            throw new GameAlreadyFinishedException("Игра закончена!");
+        }
+        if (guess == null) {
+            throw new IllegalArgumentException("guess не может быть null");
+        }
+        String normalizedGuess = dictionary.normalizeWord(guess);
+        if (normalizedGuess.isEmpty()) {
+            throw new IllegalArgumentException("Слово не может быть пустым");
+        }
+        if (!isRussianWord(normalizedGuess)) {
+            throw new IllegalArgumentException("Слово должно быть на кириллице");
+        }
+        if (normalizedGuess.length() != answer.length()) {
+            throw new IllegalArgumentException("Длина слова не совпадает с длиной ответа");
+        }
+        if (!dictionary.contains(normalizedGuess)) {
+            throw new WordNotFoundInDictionaryException("Слово отсутствует в словаре!");
+        }
+        String hint = dictionary.compare(answer, normalizedGuess);
+        attempts.add(normalizedGuess);
+        hints.add(hint);
+        steps++;
+        if (normalizedGuess.equals(answer)) {
+            won = true;
+            finished = true;
+        } else if (steps >= MAX_STEPS) {
+            finished = true;
+        }
+        return hint;
+    }
+
+    private void validateDictionary(WordleDictionary dictionary) {
+        if (dictionary == null) {
+            throw new IllegalArgumentException("Словарь не должен быть null");
+        }
+        if (dictionary.isEmpty()) {
+            throw new EmptyDictionaryException("Словарь пуст!");
+        }
+    }
+
+    public int getRemainingSteps() {
+        return MAX_STEPS - steps;
+    }
+
+    public int getSteps() {
+        return steps;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public List<String> getAttempts() {
+        return List.copyOf(attempts);
+    }
+
+    public List<String> getHints() {
+        return List.copyOf(hints);
+    }
+
+    public String suggestWord()
+            throws GameAlreadyFinishedException, NoAvailableWordsException {
+        if (finished) {
+            throw new GameAlreadyFinishedException("Игра закончена!");
+        }
+        for (String word : dictionary.getWords()) {
+            if (attempts.contains(word)) {
+                continue;
+            }
+            if (suggestedWords.contains(word)) {
+                continue;
+            }
+            if (word.length() != answer.length()) {
+                continue;
+            }
+            if (!matchesHistory(word)) {
+                continue;
+            }
+            suggestedWords.add(word);
+            return word;
+        }
+        throw new NoAvailableWordsException("Нет доступных слов для подсказки!");
+    }
+
+    private boolean matchesHistory(String candidate) {
+        for (int i = 0; i < attempts.size(); i++) {
+            String attempt = attempts.get(i);
+            String hint = hints.get(i);
+            String generatedHint = dictionary.compare(candidate, attempt);
+            if (!generatedHint.equals(hint)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isWon() {
+        return won;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public String getState() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("История ходов:")
+                .append(System.lineSeparator());
+
+        for (int i = 0; i < attempts.size(); i++) {
+            builder.append(attempts.get(i))
+                    .append(System.lineSeparator());
+            builder.append(hints.get(i))
+                    .append(System.lineSeparator())
+                    .append(System.lineSeparator());
+        }
+
+        builder.append("Ход: ")
+                .append(steps)
+                .append(System.lineSeparator());
+
+        builder.append("Осталось попыток: ")
+                .append(getRemainingSteps());
+
+        return builder.toString();
+    }
+
+    private boolean isRussianWord(String word) {
+        for (int i = 0; i < word.length(); i++) {
+            char current = word.charAt(i);
+            if (current < 'а' || current > 'я') {
+                return false;
+            }
+        }
+        return true;
+    }
 }
