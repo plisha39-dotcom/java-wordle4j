@@ -54,7 +54,8 @@ public class WordleGame {
         this.won = false;
     }
 
-    public String makeGuess(String guess) {
+    public String makeGuess(String guess)
+            throws GameAlreadyFinishedException, WordNotFoundInDictionaryException {
         if (finished) {
             throw new GameAlreadyFinishedException("Игра закончена!");
         }
@@ -64,6 +65,9 @@ public class WordleGame {
         String normalizedGuess = dictionary.normalizeWord(guess);
         if (normalizedGuess.isEmpty()) {
             throw new IllegalArgumentException("Слово не может быть пустым");
+        }
+        if (!isRussianWord(normalizedGuess)) {
+            throw new IllegalArgumentException("Слово должно быть на кириллице");
         }
         if (normalizedGuess.length() != answer.length()) {
             throw new IllegalArgumentException("Длина слова не совпадает с длиной ответа");
@@ -113,7 +117,8 @@ public class WordleGame {
         return List.copyOf(hints);
     }
 
-    public String suggestWord() {
+    public String suggestWord()
+            throws GameAlreadyFinishedException, NoAvailableWordsException {
         if (finished) {
             throw new GameAlreadyFinishedException("Игра закончена!");
         }
@@ -178,5 +183,15 @@ public class WordleGame {
                 .append(getRemainingSteps());
 
         return builder.toString();
+    }
+
+    private boolean isRussianWord(String word) {
+        for (int i = 0; i < word.length(); i++) {
+            char current = word.charAt(i);
+            if (current < 'а' || current > 'я') {
+                return false;
+            }
+        }
+        return true;
     }
 }
