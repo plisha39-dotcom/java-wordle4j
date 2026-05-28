@@ -2,11 +2,16 @@ package ru.yandex.practicum;
 
 import ru.yandex.practicum.exceptions.EmptyDictionaryException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.Map;
 
 public class WordleDictionary {
 
     private final List<String> words;
+    private final Random random = new Random();
 
     public WordleDictionary(List<String> words) {
         List<String> newWords = new ArrayList<>();
@@ -44,7 +49,6 @@ public class WordleDictionary {
         if (isEmpty()) {
             throw new EmptyDictionaryException("Словарь пуст!");
         }
-        Random random = new Random();
         int randomIndex = random.nextInt(words.size());
         return words.get(randomIndex);
     }

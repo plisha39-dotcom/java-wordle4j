@@ -5,4 +5,3 @@ public class NoAvailableWordsException extends RuntimeException {
         super(message);
     }
 }
-// Нет доступных слов для подсказки!
